@@ -4,7 +4,6 @@ import edu.ualberta.storyteller.core.parameter.*;
 import edu.ualberta.storyteller.core.dataloader.*;
 import edu.ualberta.storyteller.core.eventdetector.*;
 import edu.ualberta.storyteller.core.util.TimeUtils;
-import org.apache.commons.lang3.SerializationUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.PrintStream;
@@ -21,43 +20,33 @@ public class EventLayer {
      * @param args Program arguments.
      * @throws Exception
      */
+
     public static void main(String args[]) throws Exception{
         // load params
-        System.out.println("Working Directory = " +
-                System.getProperty("user.dir"));
-        String fNews = "../test_data/2017-08-17.txt";
-        String fParameters = "conf/ChineseNewsParameters.txt";
-        String fOutputEvents = "../test_data/events.txt";
+        ArrayList<Integer> ids = new ArrayList<>();
+        for(int i=1;i<=8590;i++){
+            ids.add(i);
+        }//创建一个id_list，这是服务器上现有的全量数据
+        Cluster(ids);//聚类主函数
+    }
+    static void Cluster(ArrayList<Integer> idlist) throws Exception {
+        String fNews = "../test_data/trump_selected.txt";//测试集，其实是假参数，只有ids才有用了
+        String fParameters = "conf/ChineseNewsParameters.txt";//参数文件
+        String fOutputEvents = "../test_data/events0322.txt";//输出写在此文件
 
         // initialization
-        Parameters parameters = new Parameters(fParameters);
-        DataLoader loader = new DataLoader(parameters);
+        Parameters parameters = new Parameters(fParameters);//自定义的一个参数类实例
+        DataLoader loader = new DataLoader(parameters);//加载参数到loader实例
 
         // load corpus
-        Corpus corpus = loader.loadCorpus(fNews);
+        Corpus corpus = loader.loadCorpus(fNews);//根据loader里的参数，加载相应语言的语料，并做一定的过滤
 
-        // filter corpus by 1st topic
-        HashSet<String> filterTopics = new HashSet<>();
-        filterTopics.add("141");
-        filterTopics.add("142");
-        filterTopics.add("116");
-        filterTopics.add("117");
-        filterTopics.add("124");
-        ArrayList<String> toRemove = new ArrayList<>();
-        for (String key: corpus.docs.keySet()) {
-            Document d = corpus.docs.get(key);
-            if (filterTopics.contains(d.topic)) {
-                toRemove.add(key);
-            }
-        }
-        for (String key: toRemove) {
-            corpus.docs.remove(key);
-        }
         System.out.println("Corpus size is " + corpus.docs.size() + " after filter by topics.");
 
         // extract events
-        EventDetector eventDetector = new EventDetector(parameters);
-        ArrayList<Event> events = eventDetector.extractEventsFromCorpus(corpus);
+        EventDetector eventDetector = new EventDetector(parameters);//社区探测
+        ArrayList<Event> events = eventDetector.extractEventsFromCorpus(corpus);//事件探测
+
 
         // output new events
         File outputEventFile = new File(fOutputEvents);
@@ -67,5 +56,4 @@ public class EventLayer {
         EventDetector.printTopics(events, outputEventStream);
         outputEventStream.close();
     }
-
 }

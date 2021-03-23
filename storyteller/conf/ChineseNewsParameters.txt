@@ -18,7 +18,7 @@ maxNodeDFPercent = .3;
 minEdgeCorrelation = .2;
 minEdgeDF = 3;
 
-minClusterNodeSize = 3; // 3
+minClusterNodeSize = 3; //original:3
 maxClusterNodeSize = 500;
 
 minDocKeywordSize = 3;
@@ -42,9 +42,9 @@ deltaDocDistribution = .5;
 
 historyLength = 2; //
 
-fModel = model/svm_model.tencent-news
+fModel = model/svm_model.Chinese-news
 
-fSameStoryModel = model/svm_model.tencent-news.same-story
+fSameStoryModel = model/svm_model.Chinese-news.same-story
 
 useRelatedNewsTitlesForMatch = true;
 fQueryDocMatchModel = model/svm_model.query_doc;

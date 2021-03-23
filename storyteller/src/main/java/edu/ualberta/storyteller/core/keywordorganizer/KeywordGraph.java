@@ -55,7 +55,7 @@ public class KeywordGraph implements Serializable {
 
 		// add nodes
 		for (Document d : corpus.docs.values()) {
-			for (Keyword k : d.keywords.values()) {
+			for (Keyword k : d.keywords.values()) {//遍历“真正”的关键词
                 // create a new node or retrieve existing node given a keyword of a document
 				KeywordNode n;
 				if (graphNodes.containsKey(k.baseForm)) {

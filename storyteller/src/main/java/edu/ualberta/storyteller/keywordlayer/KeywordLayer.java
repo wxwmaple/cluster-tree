@@ -19,7 +19,7 @@ public class KeywordLayer {
         // load params
         System.out.println("Working Directory = " +
                 System.getProperty("user.dir"));
-        String fNews = "../test_data/2017-08-17.txt";
+        String fNews = "../test_data/trump0308.txt";
         String fParameters = "conf/ChineseNewsParameters.txt";
 
         // initialization

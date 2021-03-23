@@ -100,10 +100,7 @@ public class StoryLayer {
     public static void main(String args[]) throws Exception{
         // load params
         ArrayList<String> fNewsNames = new ArrayList<>();
-        fNewsNames.add("../test_data/2017-07-19.txt");
-        fNewsNames.add("../test_data/2017-07-20.txt");
-        fNewsNames.add("../test_data/2017-07-21.txt");
-        fNewsNames.add("../test_data/2017-07-22.txt");
+        fNewsNames.add("../test_data/2017-08-17.txt");
         String fParameters = "conf/ChineseNewsParameters.txt";
         String fHistoryCorpus = "../test_data/history_corpus.ser";
         String fHistoryStoryForest = "../test_data/history_sf.ser";

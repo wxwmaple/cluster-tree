@@ -1,6 +1,7 @@
 package edu.ualberta.storyteller.core.parameter;
 
-import edu.ualberta.storyteller.core.util.*;
+import edu.ualberta.storyteller.core.util.NlpUtils;
+
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.Serializable;
@@ -8,47 +9,42 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
-public class Parameters implements Serializable {
+public class Parameters implements Serializable {//实现序列化接口
+    // 序列化的好处：可以被ObjectOutputStream转换为字节流，同时也可以通过ObjectInputStream再将其解析为对象
+    //对象->（序列化）字节流->写入文件
+    //读文件->字节流->（反序列化）对象
 
-    //! Language.
+    //语言
     public String language;
 
-    //! Data type.
+    //数据类型
     public String dataType;
 
-    //! TF boost rate for normal words.
-	//! NOTICE: currently, if it is not zero, the program will be out of memory!!!
+    //常规词的TF boost得分
     public double boostRateNormalWord = 0;
 
-    //! TF boost rate for document's main keywords.
     public double boostRateMainKeyword = 3;
 
-    //! TF boost rate for document's normal keywords.
     public double boostRateNormalKeyword = 1;
 
-    //! Minimum cosine similarity between a keyword graph and its related document.
-    //! If the similarity is bigger than this threshold, the document will be included
-    //! in the topic.
+    //文章到关键词图的最小余弦相似度
     public double minSimDoc2KeyGraph = .25;
 
-    //! Algorithm for keyword graph community detection.
+    //Todo:社区发现算法类型？
     public String communityDetectAlg = "Betweenness";
 
-    //! Algorithm for event splitting.
+    //Todo:事件发现算法类型？
     //! Currently: "DocRelation", "DocGraph", "Rule"
     public String eventSplitAlg = "DocRelation";
 
-    //! Minimum number of related documents for a topic.
-    //! Detected topics with a size smaller than it will be filtered.
+    //话题文本数阈值，太少的不构成话题
     public int minTopicSize = 5;
 
-    //! Minimum document frequency of keyword graph nodes.
-    //! Nodes in a keyword graph will a smaller DF will be filtered (too rare).
+    //关键词词频阈值，太少的不参与图构建
     public int minNodeDF = 4;
 
-	//! Minimum document frequency of keyword graph edges.
-	//! Edges in a keyword graph will a smaller DF will be filtered (too rare).
-	public int minEdgeDF = 3;
+	//关键词共现次数阈值，太少的不参与图构建
+    public int minEdgeDF = 3;
 
 	//! Minimum edge correlation of keyword graph edges.
 	//! KeywordEdge (n1, n2) will smaller correlation will be filtered
@@ -56,20 +52,16 @@ public class Parameters implements Serializable {
     //! NOTICE: this param influence the final clusters a lot.
 	public double minEdgeCorrelation = .15;
 
-    //! Maximum document frequency percentage of keyword graph nodes.
-    //! Nodes appear in over than this percentage documents will be filtered (too normal).
+    //关键词词频上界，太常见的参与图构建
     public double maxNodeDFPercent = .3;
 
-    //! Minimum number of nodes for a cluster (a keyword graph that represents a topic).
-    //! Clusters with a smaller size will be filtered.
+    //社区检测后，一个社区至少要3个keyword才能被视为topic
     public int minClusterNodeSize = 3;
 
-    //! Maximum number of nodes for a cluster (a keyword graph that represents a topic).
-    //! Clusters with a bigger size will continue be split by community detection algorithm.
+    //一个社区的关键词过多，要继续切分
     public int maxClusterNodeSize = 800;
 
-    //! Minimum number of keywords for a document.
-    //! Documents that contains less keywords will be filtered.
+    //文章不能有太少的关键词
     public int minDocKeywordSize = 5;
 
     //! Merge two document clusters if their intersect proportion is bigger than a threshold
@@ -140,8 +132,10 @@ public class Parameters implements Serializable {
      * @param paramsFile File name of parameters' file.
      * @throws Exception
      */
-	public Parameters(String paramsFile) throws Exception {
+	public Parameters(String paramsFile) throws Exception {//在构造函数中捕获异常，在调用时必须手动try/catch捕获异常
 		load(new DataInputStream(new FileInputStream(paramsFile)));
+		//FileInputStream：用于从文件读取数据，传入路径字符串形式的文件名即可
+        //DataInputStream：从底层数据流中读取数据，如FileInputStream
 	}
 
     /**
@@ -150,20 +144,16 @@ public class Parameters implements Serializable {
      * @throws Exception
      */
 	public void load(DataInputStream in) throws Exception {
-        // create variable to save parameters
-		HashMap<String, String> conf = new HashMap<String, String>();
-
-        // read parameter file and parse each line.
-        // lines started with "//" are considered to be comments
+		HashMap<String, String> conf = new HashMap<String, String>();//一个键值对集合，如k1=v1，用于存储参数
 		String line = null;
-		while ((line = in.readLine()) != null) {
-			line = line.trim();
-			if (line.startsWith("//") || line.length() == 0) {
+		while ((line = in.readLine()) != null) {//循环读取line
+			line = line.trim();//删除头尾空白
+			if (line.startsWith("//") || line.length() == 0) {//注释行或者空行
                 continue;
             }
 
-			StringTokenizer st = new StringTokenizer(line, "= ;");
-			conf.put(st.nextToken(), st.nextToken());
+			StringTokenizer st = new StringTokenizer(line, "= ;");//字符串分词器，按等号和分号分割
+			conf.put(st.nextToken(), st.nextToken());//加入键值对
 		}
 
         // parameters for experimental setup
@@ -171,7 +161,7 @@ public class Parameters implements Serializable {
         dataType = conf.get("dataType");
 
         // parameters to boost word tf
-        boostRateNormalWord = Double.parseDouble(conf.get("boostRateNormalWord"));
+        boostRateNormalWord = Double.parseDouble(conf.get("boostRateNormalWord"));//强制转换格式为double
         boostRateMainKeyword = Double.parseDouble(conf.get("boostRateMainKeyword"));
         boostRateNormalKeyword = Double.parseDouble(conf.get("boostRateNormalKeyword"));
 
@@ -207,7 +197,7 @@ public class Parameters implements Serializable {
         minTitleCommonWordsSize = Integer.parseInt(conf.get("minTitleCommonWordsSize"));
         minTitleCommonWordsPercent = Double.parseDouble(conf.get("minTitleCommonWordsPercent"));
         fStopwords = conf.get("fStopwords");
-        stopwords = NlpUtils.importStopwords(fStopwords, language);
+        stopwords = NlpUtils.importStopwords(fStopwords, language);//把停止词加进来
         eventSplitAlg = conf.get("eventSplitAlg");
 
         // parameters to merge new documents wit stories
@@ -222,7 +212,7 @@ public class Parameters implements Serializable {
 
         // parameters related to event classification supervised learning
         fModel = conf.get("fModel");
-        model = libsvm.svm.svm_load_model(fModel);
+        model = libsvm.svm.svm_load_model(fModel);//载入预训练的svm参数，详见java中libsvm包的使用方法
         fSameStoryModel = conf.get("fSameStoryModel");
         sameStoryModel = libsvm.svm.svm_load_model(fSameStoryModel);
 

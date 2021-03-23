@@ -4,7 +4,8 @@ import edu.ualberta.storyteller.core.util.*;
 import edu.ualberta.storyteller.core.parameter.*;
 import edu.ualberta.storyteller.core.dataloader.*;
 import edu.ualberta.storyteller.core.keywordorganizer.*;
-import java.io.PrintStream;
+
+import java.io.*;
 import java.util.*;
 
 public class EventDetector {
@@ -60,7 +61,8 @@ public class EventDetector {
      * @return An array list of document clusters.
      */
 	public ArrayList<Event> extractEventsFromCorpus(Corpus corpus)  throws Exception {
-        // build keyword graph from corpus
+
+	    // build keyword graph from corpus
 		KeywordGraph g = new KeywordGraph(parameters);
 		g.buildGraph(corpus);
 
@@ -77,12 +79,12 @@ public class EventDetector {
 
         // remove small size events
         // TODO: notice, here it highly influence the final cluster number with parameter "minTopicSize".
-        for (int i = 0; i < events.size(); ++i) {
-            if (events.get(i).docs.size() < parameters.minTopicSize) {
-                events.remove(i);
-                i--;
-            }
-        }
+//        for (int i = 0; i < events.size(); ++i) {
+//            if (events.get(i).docs.size() < parameters.minTopicSize) {
+//                events.remove(i);
+//                i--;
+//            }
+//        }
 
         // refine each document cluster's keyword graph, filter redundant keywords
         for (Event e: events) {
@@ -283,15 +285,40 @@ public class EventDetector {
      * @param clusters A collection of document clusters.
      * @param out Output stream.
      */
-	public static void printTopics(Collection<Event> clusters, PrintStream out) {
+	public static void printTopics(Collection<Event> clusters, PrintStream out) throws IOException {
+	    String[] t = new String[896];
+	    int countRight = 0;
+	    int countWrong = 0;
+	    int label = 1;
 		for (Event dc : clusters) {
-			out.print("KEYWORDS:\t");
-			printKeywords(dc, out);
+		    if(dc.docs.values().size()>=0){//临时添加的代码
+                out.print("KEYWORDS:\t");
+                printKeywords(dc, out);
 
-			out.print("\nDOCUMNETS:\t");
-			for (Document d : dc.docs.values()) {
-                out.print(d.title + " | ");
+                out.print("\nDOCUMENTS:\t");
+                for (Document d : dc.docs.values()) {
+                    out.print(d.title + " | ");
+                    if(d.topic.equals(Integer.toString(label))){
+                        countRight++;
+                    }
+                    else{
+                        countWrong++;
+                    }
+                }
+                label++;
+                }
+                out.print("\nCONTENTS:\n");
+		        for (Document d:dc.docs.values()){
+		            out.print(d.segContent+"\n"+"-------------------"+"\n");
+                }
+
+                out.println("\n");
+
             }
+//            System.out.println("正确率："+countRight/(countRight+countWrong));
+
+
+
 
 			/*
 			out.print("\nKEYGRAPH_NODES:\t");
@@ -306,9 +333,42 @@ public class EventDetector {
 			}
 			*/
 
-			out.println("\n");
-		}
 
+//		}
+
+//        String inputFileName = "../test_data/trump0308.txt";//测试集
+//        File inputFile = new File(inputFileName);
+//        BufferedReader in = new BufferedReader(new FileReader(inputFile));
+//        String line;
+//        int i = 1;
+//
+//        line = in.readLine();
+//        File file = new File("../test_data/trump_selected.txt");
+//        FileOutputStream fos = null;
+//        if(!file.exists()){
+//            file.createNewFile();//如果文件不存在，就创建该文件
+//            fos = new FileOutputStream(file);//首次写入获取
+//        }else{
+//            //如果文件已存在，那么就在文件末尾追加写入
+//            fos = new FileOutputStream(file,true);//这里构造方法多了一个参数true,表示在文件末尾追加写入
+//        }
+//        OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");//指定以UTF-8格式写入文件
+//        while (line!= null){
+//            // read header line and get index of different columns
+//
+//            String line_without_split = line.replaceAll("\\s+","");
+//            String[] line_with_split = line_without_split.split("\\|");
+//            if(Arrays.asList(t).contains(line_with_split[8])){
+//                System.out.println(i);
+//                i++;
+//                osw.write(line_without_split);
+//                osw.write("\r\n");
+//                System.out.println(line);
+//            }
+//
+//            line = in.readLine();
+//        }
+//        osw.close();
 	}
 
     /**

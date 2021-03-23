@@ -36,12 +36,12 @@ public class CommunityDetector {
      * @param nodes The whole graph of keywords.
      * @return A list of sub graphs.
      */
-    public ArrayList<HashMap<String, KeywordNode>> detectCommunities(HashMap<String, KeywordNode> nodes) {
+    public ArrayList<HashMap<String, KeywordNode>> detectCommunities(HashMap<String, KeywordNode> nodes) {//社区发现算法的实现
         logger.println("Extract Communities...");
         for (KeywordNode n : nodes.values()) {
-            n.visited = false;
+            n.visited = false;//先把每个节点的访问记录清空
         }
-        ArrayList<HashMap<String, KeywordNode>> communities = new ArrayList<>();
+        ArrayList<HashMap<String, KeywordNode>> communities = new ArrayList<>();//建立空社区
 
         // extract connected components from graph
         ArrayList<HashMap<String, KeywordNode>> connectedComponents = findConnectedComponents(nodes);
